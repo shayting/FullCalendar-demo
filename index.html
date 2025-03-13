@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FullCalendar</title>
+
+  <link rel="stylesheet" href="./style.css">
+  <!-- fullcalendar.js -->
+  <script src='./index.global.min.js'></script>
+  <script></script>
+  <!-- 語言轉換 -->
+  <script src="./locales-all.global.min.js"></script>
+  <!-- tooltip -->
+  <script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
+  <script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
+
+  
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'zh-tw',
+        height: 500,
+        navLinks: true,
+        headerToolbar: {
+          left: 'prev,next,today',
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay"
+        },
+
+        events: [
+          {
+            title: '露營',
+            start: '2025-03-22',
+            end: '2025-03-25',
+            url: 'http://google.com.tw',
+            // customized props
+            description: '跟好朋友去露營',
+            // extendedProps: {
+            //   description: '跟好朋友去露營'
+            // },
+          }
+        ],
+
+        // click event
+        eventClick: function (info) {
+          info.jsEvent.preventDefault(); // don't let the browser navigate
+
+          if (info.event.url) {
+            window.open(info.event.url);
+          }
+        },
+
+        // monuse enter event
+        eventMouseEnter: function (info) {
+          console.log(info.event.extendedProps.description)
+        },
+
+
+        // tooltip
+        eventDidMount: function (info) {
+          var tooltip = new Tooltip(info.el, {
+            title: info.event.extendedProps.description,
+            placement: 'top',
+            trigger: 'hover',
+            container: 'body'
+          });
+        },
+
+      });
+      calendar.render();
+    });
+
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div id='calendar'></div>
+  </div>
+</body>
+
+<!-- reference -->
+<!-- https://fullcalendar.io/ -->
+<!-- https://fullcalendar.io/docs/event-tooltip-demo -->
+
+</html>
