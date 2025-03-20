@@ -6,69 +6,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FullCalendar</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+TC:wght@100..900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <!-- fullcalendar.js -->
   <script src='./index.global.min.js'></script>
   <script></script>
   <!-- 語言轉換 -->
-  <script src="./locales-all.global.min.js"></script>
+  <!-- <script src="./locales-all.global.min.js"></script> -->
   <!-- tooltip -->
   <script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
   <script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
 
-  
+
   <script>
 
     document.addEventListener('DOMContentLoaded', function () {
       var calendarEl = document.getElementById('calendar');
+
+      // events source
+      // 請注意！！ end: 為事件結束日的後一天，所以假如活動日期為 2025-03-13 至 2025-03-17，那 end 必須設為 '2025-03-18'
+      const events = [
+        {
+          title: '部門聚餐',
+          start: '2025-03-02',
+          description: '地點：王品牛排',
+        }
+        ,
+        {
+          title: '員工旅遊',
+          start: '2025-03-13',
+          end: '2025-03-18',
+          url: 'http://google.com.tw',
+          // customized props
+          description: '<div class="tooltip-title">員工旅遊</div><div>2025好事員工旅遊，要去哪裡玩呢要去哪裡玩呢要去哪裡玩呢要去哪裡玩呢</div>',
+        }
+      ]
+
+
       var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        locale: 'zh-tw',
-        height: 500,
-        navLinks: true,
+        // locale: 'zh-tw',
+        navLinks: false,
         headerToolbar: {
-          left: 'prev,next,today',
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay"
+          left: 'title',
+          right: "prev,next"
         },
+        contentHeight: 'auto', //不會有scrollbar
 
-        events: [
-          {
-            title: '露營',
-            start: '2025-03-22',
-            end: '2025-03-25',
-            url: 'http://google.com.tw',
-            // customized props
-            description: '跟好朋友去露營',
-            // extendedProps: {
-            //   description: '跟好朋友去露營'
-            // },
-          }
-        ],
-
-        // click event
+        // 客製化 日曆 header
+        dayHeaderContent: (info) => {
+          const chineseDays = ['日', '一', '二', '三', '四', '五', '六']
+          return chineseDays[info.date.getDay()]
+        },
+        events: events,
         eventClick: function (info) {
-          info.jsEvent.preventDefault(); // don't let the browser navigate
+          info.jsEvent.preventDefault();
 
           if (info.event.url) {
             window.open(info.event.url);
           }
         },
 
-        // monuse enter event
-        eventMouseEnter: function (info) {
-          console.log(info.event.extendedProps.description)
-        },
-
-
-        // tooltip
         eventDidMount: function (info) {
+          // tooltip
           var tooltip = new Tooltip(info.el, {
             title: info.event.extendedProps.description,
-            placement: 'top',
+            placement: 'bottom',
             trigger: 'hover',
-            container: 'body'
+            container: 'body',
+            html: true, // 允許 HTML 內容
+            sanitize: false,
           });
+
+          // set event background
+          const startDate = new Date(info.event.startStr) // 開始日期
+          const endDate = new Date(info.event.endStr) // 結束日期
+
+
+          // endDate 會是事件的"下一天"，所以要減 1 天
+          endDate.setDate(endDate.getDate() - 1)
+
+          let currentDate = new Date(startDate)
+
+          while (currentDate <= endDate) {
+            const dateString = currentDate.toISOString().split('T')[0] // 轉成 YYYY-MM-DD 格式
+            const cell = document.querySelector(`[data-date="${dateString}"]`)
+            if (cell) {
+              cell.classList.add('has-event')
+            }
+            currentDate.setDate(currentDate.getDate() + 1) // 日期 +1
+          }
         },
 
       });
